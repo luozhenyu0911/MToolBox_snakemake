@@ -48,9 +48,7 @@ def usage():
         -m		MUSCLE executable PATH [/usr/local/bin/muscle]
         -b		basename for output files
         -s		file with most reliable haplogroup prediction
-        -d      data_filte
         """)
-
 
 def pickle_csv(csvfile, pickle_fname=None):
     tree_file = csv.reader(open(csvfile, 'rb'))
@@ -202,11 +200,11 @@ def h_analysis(htrees, seq_diff, regions, mhcs_dict):
     return a
 
 
-def load_sequences(fname):
-    a = SeqList()
-    a.load_file(fname)
-    print("Loaded {} contig sequences".format(len(a)))
-    return a
+# def load_sequences(fname):
+#     a = SeqList()
+#     a.load_file(fname)
+#     print("Loaded {} contig sequences".format(len(a)))
+#     return a
 
 
 # TODO: seq_diff, seq_diff_mhcs, seq_diff_rcrs are not used anywhere
@@ -219,11 +217,12 @@ def write_output(class_obj, seq_diff, seq_diff_mhcs, seq_diff_rcrs, merged_table
         merged_tables_file.write(','.join(row)+'\n')
 
 
-def main_mt_hpred(contig_file='mtDNAassembly-contigs.fasta',
-                  muscle_exe="/usr/bin/muscle",
-                  basename="mtDNAassembly-contigs",
-                  best_results_file='mt_classification_best_results.csv',
-                  data_file=None):
+# def main_mt_hpred(contig_file='mtDNAassembly-contigs.fasta',
+#                   muscle_exe="/usr/bin/muscle",
+#                   basename="mtDNAassembly-contigs",
+#                   best_results_file='mt_classification_best_results.csv',
+#                   data_file=None):
+def main_mt_hpred(contig_file,muscle_exe,basename,best_results_file,data_file):
     print("Your best results file is {}".format(best_results_file))
     # sample name
     f = os.path.abspath(contig_file)
@@ -328,6 +327,19 @@ def main_mt_hpred(contig_file='mtDNAassembly-contigs.fasta',
             contig_rcrs_seq_diff, mergedtables)
 
 
+
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Assigns haplogroup to contigs and performs functional annotation')
+    parser.add_argument('-i', '--contig_file', default='mtDNAassembly-contigs.fasta', help='Contig file (Default: mtDNAassembly-contigs.fasta)')
+    parser.add_argument('-m', '--muscle_exe', default=shutil.which("muscle"), help='MUSCLE executable path (Default: MUSCLE installation PATH)')
+    parser.add_argument('-b', '--basename', default='mtDNAassembly-contigs', help='Basename for output files (Default: mtDNAassembly-contigs)')
+    parser.add_argument('-s', '--best_results_file', default='mt_classification_best_results.csv', help='File with most reliable haplogroup prediction (Default: mt_classification_best_results.csv)')
+    parser.add_argument('-d', '--dir', help='Directory where to find data for haplogroup classification and functional annotation')
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hi:m:b:s:d:")
@@ -335,27 +347,33 @@ if __name__ == "__main__":
         print(str(err))
         usage()
         sys.exit()
-    contig_file = 'mtDNAassembly-contigs.fasta'
-    muscle_exe = shutil.which('muscle')
-    basename = 'mtDNAassembly-contigs'
-    best_results_file = 'mt_classification_best_results.csv'
-    for o, a in opts:
-        if o == "-h":
-            usage()
-            sys.exit()
-        elif o == "-d":
-            data_file = a
-        elif o == "-i":
-            contig_file = a
-        elif o == "-m":
-            muscle_exe = a
-        elif o == "-b":
-            basename = a
-        elif o == "-s":
-            best_results_file = a
-        else:
-            assert False, "Unhandled option."
-    data_file="/BIGDATA2/gzfezx_shhli_2/software/MToolBox_snakemake/data/classifier/"
+    # contig_file = 'mtDNAassembly-contigs.fasta'
+    # muscle_exe = shutil.which('muscle')
+    # basename = 'mtDNAassembly-contigs'
+    # best_results_file = 'mt_classification_best_results.csv'
+    # for o, a in opts:
+    #     if o == "-h":
+    #         usage()
+    #         sys.exit()
+    #     elif o == "-d":
+    #         data_file = a
+    #     elif o == "-i":
+    #         contig_file = a
+    #     elif o == "-m":
+    #         muscle_exe = a
+    #     elif o == "-b":
+    #         basename = a
+    #     elif o == "-s":
+    #         best_results_file = a
+    #     else:
+    #         assert False, "Unhandled option."
+    args = parse_args()
+    data_file = args.dir
+    contig_file = args.contig_file
+    muscle_exe = args.muscle_exe
+    basename = args.basename
+    best_results_file = args.best_results_file
+
     # TODO: what is data_file?
     if data_file is None:
         sys.exit(("You must specify the folder where data for mt_classifier "

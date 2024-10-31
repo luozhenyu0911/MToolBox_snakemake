@@ -53,12 +53,14 @@ rule main_mt_hpred:
         basename = lambda wildcards: "results/{sample}/{sample}_{ref_genome_mt}_{ref_genome_n}".format(
             sample=wildcards.sample, ref_genome_mt=wildcards.ref_genome_mt,
             ref_genome_n=wildcards.ref_genome_n
-        )
+        ),
+        muscle_exe = "/BIGDATA2/gzfezx_shhli_2/software/muscle3.8.31_i86linux64"
+        # data_file = "/BIGDATA2/gzfezx_shhli_2/software/MToolBox_snakemake/data/classifier/phylotree_r17.pickle"
     run:
         sc, contig_seq_diff, contig_mhcs_seq_diff, contig_rcrs_seq_diff, mergedtables = main_mt_hpred(
-            contig_file=contig_file, muscle_exe=muscle_exe, basename=basename,
-            best_results_file=best_results_file, data_file=data_file
-        )
+            contig_file={input.single_fasta}, muscle_exe={params.muscle_exe}, basename={params.basename},
+            best_results_file={output.haplo_pred}, 
+            data_file="/BIGDATA2/gzfezx_shhli_2/software/MToolBox_snakemake/data/classifier/")
         write_output(sc, contig_seq_diff.diff_list, contig_mhcs_seq_diff.diff_list,
                      contig_rcrs_seq_diff.diff_list, mergedtables, basename)
 
